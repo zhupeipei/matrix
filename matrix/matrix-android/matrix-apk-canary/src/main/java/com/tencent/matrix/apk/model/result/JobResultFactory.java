@@ -32,6 +32,8 @@ public final class JobResultFactory {
                 jobResult = new JobJsonResult(format, config.getOutputPath());
             } else if (TaskResultFactory.isHtmlResult(format)) {
                 jobResult = new JobHtmlResult(format, config.getOutputPath());
+            } else if (TaskResultFactory.isXmlyResult(format)) {
+                jobResult = new JobXmlyResult(format, config);
             }
         }
         return jobResult;

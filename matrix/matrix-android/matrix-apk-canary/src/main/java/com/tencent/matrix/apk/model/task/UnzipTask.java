@@ -26,10 +26,10 @@ import com.tencent.matrix.apk.model.result.TaskResult;
 import com.tencent.matrix.apk.model.result.TaskResultFactory;
 import com.android.utils.Pair;
 import com.tencent.matrix.apk.model.task.util.ResguardUtil;
+
 import com.tencent.matrix.javalib.util.FileUtil;
 import com.tencent.matrix.javalib.util.Log;
 import com.tencent.matrix.javalib.util.Util;
-
 import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedOutputStream;

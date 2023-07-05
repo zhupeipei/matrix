@@ -42,7 +42,7 @@ public class JobJsonResult extends JobResult {
 
     public JobJsonResult(String format, String outputPath) {
         this.format = format;
-        this.outputFile = new File(outputPath + "." + TaskResultFactory.TASK_RESULT_TYPE_JSON);
+        this.outputFile = new File(outputPath, "apk_check" + "." + TaskResultFactory.TASK_RESULT_TYPE_JSON);
         this.resultList = new ArrayList<>();
     }
 

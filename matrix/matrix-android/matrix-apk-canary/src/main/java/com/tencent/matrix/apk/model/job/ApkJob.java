@@ -22,18 +22,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.tencent.matrix.apk.ApkChecker;
 import com.tencent.matrix.apk.model.output.MMTaskResultRegistry;
-import com.tencent.matrix.apk.model.result.JobResult;
-import com.tencent.matrix.apk.model.result.JobResultFactory;
-import com.tencent.matrix.apk.model.result.TaskResult;
-import com.tencent.matrix.apk.model.result.TaskResultFactory;
-import com.tencent.matrix.apk.model.result.TaskResultRegistry;
+import com.tencent.matrix.apk.model.result.*;
 import com.tencent.matrix.apk.model.task.ApkTask;
 import com.tencent.matrix.apk.model.task.TaskFactory;
 import com.tencent.matrix.apk.model.task.util.ApkConstants;
 import com.tencent.matrix.javalib.util.FileUtil;
 import com.tencent.matrix.javalib.util.Log;
 import com.tencent.matrix.javalib.util.Util;
-
 import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedReader;
@@ -113,14 +108,12 @@ public final class ApkJob {
     }
 
     private String getApkRawName(String name) {
-        if (name == null || name.isEmpty()) {
+        if (name != null && !name.isEmpty()) {
+            int index = name.indexOf(46);
+            return index == -1 ? name : name.substring(0, index);
+        } else {
             return "";
         }
-        int index = name.indexOf('.');
-        if (index == -1) {
-            return name;
-        }
-        return name.substring(0, index);
     }
 
     private ApkTask createTask(String name, Map<String, String> params) {
@@ -153,6 +146,26 @@ public final class ApkJob {
             task = TaskFactory.factory(TaskFactory.TASK_TYPE_UNSTRIPPED_SO, jobConfig, params);
         } else if (JobConstants.OPTION_COUNT_CLASS.equals(name)) {
             task = TaskFactory.factory(TaskFactory.TASK_TYPE_COUNT_CLASS, jobConfig, params);
+        } else if ("-xmapk".equals(name)) {
+            task = TaskFactory.factory(16, this.jobConfig, params);
+        } else if ("-xmfile".equals(name)) {
+            task = TaskFactory.factory(17, this.jobConfig, params);
+        } else if ("-xmmanifest".equals(name)) {
+            task = TaskFactory.factory(TaskFactory.TASK_TYPE_XMMANIFEST, this.jobConfig, params);
+        } else if ("-xmassets".equals(name)) {
+            task = TaskFactory.factory(19, this.jobConfig, params);
+        } else if ("-xmimage".equals(name)) {
+            task = TaskFactory.factory(20, this.jobConfig, params);
+        } else if ("-xmresource".equals(name)) {
+            task = TaskFactory.factory(21, this.jobConfig, params);
+        } else if ("-xmRfile".equals(name)) {
+            task = TaskFactory.factory(22, this.jobConfig, params);
+        } else if ("-xmclass".equals(name)) {
+            task = TaskFactory.factory(23, this.jobConfig, params);
+        } else if ("-xmmethod".equals(name)) {
+            task = TaskFactory.factory(24, this.jobConfig, params);
+        } else if ("-xmlibrary".equals(name)) {
+            task = TaskFactory.factory(25, this.jobConfig, params);
         }
         return task;
     }
@@ -180,6 +193,26 @@ public final class ApkJob {
                         jobConfig.setInputDir(value);
                     }
                 }
+
+            if (config.has("--targetUrl")) {
+                this.jobConfig.setTargetUrl(config.get("--targetUrl").getAsString());
+            }
+
+            if (config.has("--branch")) {
+                this.jobConfig.setBranch(config.get("--branch").getAsString());
+            }
+
+            if (config.has("--buildNumber")) {
+                this.jobConfig.setBuildNumber(config.get("--buildNumber").getAsString());
+            }
+
+            if (config.has("--bundleVersion")) {
+                this.jobConfig.setBundleVersion(config.get("--bundleVersion").getAsString());
+            }
+
+            if (config.has("--pipeLineHistoryId")) {
+                this.jobConfig.setPipeLineHistoryId(config.get("--pipeLineHistoryId").getAsString());
+            }
 
                 value = "";
                 if (config.has(JobConstants.PARAM_APK)) {
@@ -252,6 +285,7 @@ public final class ApkJob {
                         TaskResultRegistry resultRegistry = (TaskResultRegistry) registryClass.newInstance();
                         TaskResultFactory.addCustomTaskJsonResult(resultRegistry.getJsonResult());
                         TaskResultFactory.addCustomTaskHtmlResult(resultRegistry.getHtmlResult());
+                        TaskResultFactory.addCustomTaskXmlyResuly(resultRegistry.getXmlyResult());
                     }
                 }
 
@@ -380,6 +414,26 @@ public final class ApkJob {
                 jobConfig.setApkPath(apkPath);
                 File apkFile = new File(apkPath);
 
+                if (globalParams.containsKey("--targetUrl")) {
+                    this.jobConfig.setTargetUrl((String) globalParams.get("--targetUrl"));
+                }
+
+                if (globalParams.containsKey("--branch")) {
+                    this.jobConfig.setBranch((String) globalParams.get("--branch"));
+                }
+
+                if (globalParams.containsKey("--buildNumber")) {
+                    this.jobConfig.setBuildNumber((String) globalParams.get("--buildNumber"));
+                }
+
+                if (globalParams.containsKey("--bundleVersion")) {
+                    this.jobConfig.setBundleVersion((String) globalParams.get("--bundleVersion"));
+                }
+
+                if (globalParams.containsKey("--pipeLineHistoryId")) {
+                    this.jobConfig.setPipeLineHistoryId((String) globalParams.get("--pipeLineHistoryId"));
+                }
+
                 if (globalParams.containsKey(JobConstants.PARAM_UNZIP)) {
                     jobConfig.setUnzipPath(globalParams.get(JobConstants.PARAM_UNZIP));
                 } else {
@@ -431,6 +485,7 @@ public final class ApkJob {
                         TaskResultRegistry resultRegistry = (TaskResultRegistry) registryClass.newInstance();
                         TaskResultFactory.addCustomTaskJsonResult(resultRegistry.getJsonResult());
                         TaskResultFactory.addCustomTaskHtmlResult(resultRegistry.getHtmlResult());
+                        TaskResultFactory.addCustomTaskXmlyResuly(resultRegistry.getXmlyResult());
                     }
                 }
 
@@ -449,6 +504,7 @@ public final class ApkJob {
             MMTaskResultRegistry mmTaskResultRegistry = new MMTaskResultRegistry();
             TaskResultFactory.addCustomTaskHtmlResult(mmTaskResultRegistry.getHtmlResult());
             TaskResultFactory.addCustomTaskJsonResult(mmTaskResultRegistry.getJsonResult());
+            TaskResultFactory.addCustomTaskXmlyResuly(mmTaskResultRegistry.getXmlyResult());
         } catch (Exception e) {
             ApkChecker.printError(e.getMessage());
         }

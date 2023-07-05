@@ -23,9 +23,12 @@ import java.util.Map;
  */
 
 public abstract class TaskResultRegistry {
+    public TaskResultRegistry() {
+    }
 
     public abstract Map<String, Class<? extends TaskHtmlResult>> getHtmlResult();
 
     public abstract Map<String, Class<? extends TaskJsonResult>> getJsonResult();
 
+    public abstract Map<String, Class<? extends TaskXmlyResult>> getXmlyResult();
 }

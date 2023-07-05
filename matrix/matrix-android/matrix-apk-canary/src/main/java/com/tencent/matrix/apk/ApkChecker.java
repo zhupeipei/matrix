@@ -18,6 +18,9 @@ package com.tencent.matrix.apk;
 
 import com.tencent.matrix.apk.model.job.ApkJob;
 import com.tencent.matrix.apk.model.job.JobConstants;
+import com.tencent.matrix.apk.model.xmresult.configbuilder.ConfigBuilder;
+
+import java.io.File;
 
 /**
  * Created by jinqiuchen on 17/5/23.
@@ -75,6 +78,7 @@ public final class ApkChecker {
     }
 
     public static void main(String... args) {
+        args = new String[]{"--format[json]", "--apk[/Users/xmly/zimoDev/mygithub/matrix/matrix/matrix-android/test/apkCheck/MainApp_v9.1.12.3.dev_c577_release_230704_arm64.apk]", "-manifest"};
         if (args.length > 0) {
             ApkChecker m = new ApkChecker();
             m.run(args);
@@ -85,13 +89,18 @@ public final class ApkChecker {
     }
 
     private void run(String[] args) {
-      ApkJob job = new ApkJob(args);
-      try {
-          job.run();
-      } catch (Exception e) {
-          e.printStackTrace();
-          System.exit(-1);
-      }
+        try {
+            ApkChecker.CheckerPath path = parseArgs(args);
+            File config = ConfigBuilder.buildConfig(path.apk, path.mapping, path.resmapping, path.rTxt, path.nmTool, path);
+            ConfigBuilder.prepareMoudleName(path.module);
+            String[] orignal = new String[]{"--config", config.getAbsolutePath()};
+            ApkJob job = new ApkJob(orignal);
+            job.run();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
     }
 
     public static void printError(String error) {
@@ -104,4 +113,55 @@ public final class ApkChecker {
         System.exit(-1);
     }
 
+    private static ApkChecker.CheckerPath parseArgs(String[] args) {
+        ApkChecker.CheckerPath path = new ApkChecker.CheckerPath();
+        String[] var2 = args;
+        int var3 = args.length;
+
+        for (int var4 = 0; var4 < var3; ++var4) {
+            String arg = var2[var4];
+            if (arg.startsWith("--apk") && arg.contains("[") && arg.contains("]")) {
+                path.apk = arg.substring(arg.indexOf("[") + 1, arg.indexOf("]"));
+            } else if (arg.startsWith("--mapping") && arg.contains("[") && arg.contains("]")) {
+                path.mapping = arg.substring(arg.indexOf("[") + 1, arg.indexOf("]"));
+            } else if (arg.startsWith("--rtxt") && arg.contains("[") && arg.contains("]")) {
+                path.rTxt = arg.substring(arg.indexOf("[") + 1, arg.indexOf("]"));
+            } else if (arg.startsWith("--nmtool") && arg.contains("[") && arg.contains("]")) {
+                path.nmTool = arg.substring(arg.indexOf("[") + 1, arg.indexOf("]"));
+            } else if (arg.startsWith("--resmapping") && arg.contains("[") && arg.contains("]")) {
+                path.resmapping = arg.substring(arg.indexOf("[") + 1, arg.indexOf("]"));
+            } else if (arg.startsWith("--module") && arg.contains("[") && arg.contains("]")) {
+                path.module = arg.substring(arg.indexOf("[") + 1, arg.indexOf("]"));
+            } else if (arg.startsWith("--result_url") && arg.contains("[") && arg.contains("]")) {
+                path.url = arg.substring(arg.indexOf("[") + 1, arg.indexOf("]"));
+            } else if (arg.startsWith("--branch") && arg.contains("[") && arg.contains("]")) {
+                path.branch = arg.substring(arg.indexOf("[") + 1, arg.indexOf("]"));
+            } else if (arg.startsWith("--buildNumber") && arg.contains("[") && arg.contains("]")) {
+                path.buildNumber = arg.substring(arg.indexOf("[") + 1, arg.indexOf("]"));
+            } else if (arg.startsWith("--bundleVersion") && arg.contains("[") && arg.contains("]")) {
+                path.bundleVersion = arg.substring(arg.indexOf("[") + 1, arg.indexOf("]"));
+            } else if (arg.startsWith("--pipeLineHistoryId") && arg.contains("[") && arg.contains("]")) {
+                path.pipeLineHistoryId = arg.substring(arg.indexOf("[") + 1, arg.indexOf("]"));
+            }
+        }
+
+        return path;
+    }
+
+    public static class CheckerPath {
+        public String apk = null;
+        public String mapping = null;
+        public String resmapping = null;
+        public String rTxt = null;
+        public String nmTool = null;
+        public String module = null;
+        public String url = null;
+        public String branch = null;
+        public String buildNumber = null;
+        public String bundleVersion = null;
+        public String pipeLineHistoryId = null;
+
+        public CheckerPath() {
+        }
+    }
 }

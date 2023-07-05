@@ -35,13 +35,20 @@ public final class JobConfig {
     private String outputPath;
     private String mappingFilePath;
     private String resMappingFilePath;
+    private String targetUrl;
     private JsonArray outputConfig;
-
+    private String branch;
+    private String buildNumber;
+    private String bundleVersion;
+    private String pipeLineHistoryId;
     private List<String> outputFormatList;
     private Map<String, String> proguardClassMap;
     private Map<String, String> resguardMap;
     private Map<String, Pair<Long, Long>> entrySizeMap;
     private Map<String, String> entryNameMap;
+
+    public JobConfig() {
+    }
 
     public String getInputDir() {
         return inputDir;
@@ -97,6 +104,46 @@ public final class JobConfig {
 
     public void setResMappingFilePath(String resMappingFilePath) {
         this.resMappingFilePath = resMappingFilePath;
+    }
+
+    public String getTargetUrl() {
+        return this.targetUrl;
+    }
+
+    public void setTargetUrl(String targetUrl) {
+        this.targetUrl = targetUrl;
+    }
+
+    public String getBranch() {
+        return this.branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
+
+    public String getBuildNumber() {
+        return this.buildNumber;
+    }
+
+    public void setBuildNumber(String buildNumber) {
+        this.buildNumber = buildNumber;
+    }
+
+    public String getBundleVersion() {
+        return this.bundleVersion;
+    }
+
+    public void setBundleVersion(String bundleVersion) {
+        this.bundleVersion = bundleVersion;
+    }
+
+    public String getPipeLineHistoryId() {
+        return this.pipeLineHistoryId;
+    }
+
+    public void setPipeLineHistoryId(String pipeLineHistoryId) {
+        this.pipeLineHistoryId = pipeLineHistoryId;
     }
 
     public Map<String, String> getProguardClassMap() {

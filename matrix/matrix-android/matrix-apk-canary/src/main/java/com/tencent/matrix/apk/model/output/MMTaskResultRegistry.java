@@ -19,6 +19,7 @@ package com.tencent.matrix.apk.model.output;
 import com.tencent.matrix.apk.model.result.TaskHtmlResult;
 import com.tencent.matrix.apk.model.result.TaskJsonResult;
 import com.tencent.matrix.apk.model.result.TaskResultRegistry;
+import com.tencent.matrix.apk.model.result.TaskXmlyResult;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,12 @@ public class MMTaskResultRegistry extends TaskResultRegistry {
     public Map<String, Class<? extends TaskJsonResult>> getJsonResult() {
         Map<String, Class<? extends TaskJsonResult>> map = new HashMap<>();
         map.put("mm.json", MMTaskJsonResult.class);
+        return map;
+    }
+
+    public Map<String, Class<? extends TaskXmlyResult>> getXmlyResult() {
+        Map<String, Class<? extends TaskXmlyResult>> map = new HashMap();
+        map.put("mm.xmly", MMTaskXmlyResult.class);
         return map;
     }
 }

@@ -25,12 +25,11 @@ import com.tencent.matrix.apk.model.job.JobConfig;
 import com.tencent.matrix.apk.model.task.TaskFactory;
 import com.tencent.matrix.javalib.util.Log;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Created by zhangshaowen on 17/6/12.
@@ -41,9 +40,13 @@ public final class TaskResultFactory {
 
     public static final String TASK_RESULT_TYPE_JSON = "json";
     public static final String TASK_RESULT_TYPE_HTML = "html";
+    public static final String TASK_RESULT_TYPE_XMLY = "xmly";
+    private static Map<String, Class<? extends TaskHtmlResult>> customHtmlResultMap = new HashMap();
+    private static Map<String, Class<? extends TaskJsonResult>> customJsonResultMap = new HashMap();
+    private static Map<String, Class<? extends TaskXmlyResult>> customXmlyResultMap = new HashMap();
 
-    private static Map<String, Class<? extends TaskHtmlResult>> customHtmlResultMap = new HashMap<>();
-    private static Map<String, Class<? extends TaskJsonResult>> customJsonResultMap = new HashMap<>();
+    public TaskResultFactory() {
+    }
 
     public static TaskResult factory(int taskType, String resultType, JobConfig config) throws ParserConfigurationException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         TaskResult result = null;
@@ -62,6 +65,8 @@ public final class TaskResultFactory {
             result = new TaskJsonResult(taskType, taskConfig);
         } else if (TASK_RESULT_TYPE_HTML.equals(resultType)) {
             result = new TaskHtmlResult(taskType, taskConfig);
+        } else if (TASK_RESULT_TYPE_XMLY.equals(resultType)) {
+            result = TaskXmlyResult.getTaskXmlyResult(taskType, taskConfig);
         } else if (customHtmlResultMap.containsKey(resultType)) {
             Class class1 = customHtmlResultMap.get(resultType);
             Constructor constructor = class1.getDeclaredConstructor(int.class, JsonObject.class);
@@ -70,6 +75,10 @@ public final class TaskResultFactory {
             Class class1 = customJsonResultMap.get(resultType);
             Constructor constructor = class1.getDeclaredConstructor(int.class, JsonObject.class);
             result = (TaskJsonResult) constructor.newInstance(taskType, taskConfig);
+        } else if (customXmlyResultMap.containsKey(resultType)) {
+            Class class1 = customXmlyResultMap.get(resultType);
+            Constructor constructor = class1.getDeclaredConstructor(int.class, JsonObject.class);
+            result = (TaskXmlyResult) constructor.newInstance(taskType, taskConfig);
         } else {
             result = new TaskHtmlResult(taskType, taskConfig);
         }
@@ -80,17 +89,22 @@ public final class TaskResultFactory {
         TaskResult result = null;
         try {
             if (source instanceof TaskJsonResult) {
-                if (TaskResultFactory.customHtmlResultMap.containsKey(destResultType) || destResultType.equals(TaskResultFactory.TASK_RESULT_TYPE_HTML)) {
-                    result = TaskResultFactory.factory(taskType, destResultType, config);
-                    transferJsonToHtml((TaskJsonResult) source, (TaskHtmlResult) result);
-                } else if (TaskResultFactory.customJsonResultMap.containsKey(destResultType)) {
-                    result = TaskResultFactory.factory(taskType, destResultType, config);
-                    formatJson((TaskJsonResult) source, (TaskJsonResult) result);
+                if (!TaskResultFactory.customHtmlResultMap.containsKey(destResultType) && !destResultType.equals("html")) {
+                    if (TaskResultFactory.customJsonResultMap.containsKey(destResultType)) {
+                        result = factory(taskType, destResultType, config);
+                        formatJson((TaskJsonResult) source, (TaskJsonResult) result);
+                    } else if (TaskResultFactory.customXmlyResultMap.containsKey(destResultType)) {
+                        result = factory(taskType, destResultType, config);
+                        parseToXmlyForm((TaskJsonResult) source, (TaskXmlyResult) result);
+                    } else {
+                        result = source;
+                    }
                 } else {
-                    result = source;
+                    result = factory(taskType, destResultType, config);
+                    transferJsonToHtml((TaskJsonResult) source, (TaskHtmlResult) result);
                 }
             }
-        } catch (ParserConfigurationException | InstantiationException |  IllegalAccessException |  NoSuchMethodException | InvocationTargetException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException | ParserConfigurationException e) {
             Log.e(TAG, "transfer task result failed! " + e.getMessage());
             result = null;
         }
@@ -106,12 +120,20 @@ public final class TaskResultFactory {
         dest.format(source.jsonObject);
     }
 
+    private static void parseToXmlyForm(TaskJsonResult source, TaskXmlyResult dest) {
+        dest.format(source);
+    }
+
     public static void addCustomTaskHtmlResult(Map<String, Class<? extends TaskHtmlResult>> customTaskHtmlResult) {
         customHtmlResultMap.putAll(customTaskHtmlResult);
     }
 
     public static void addCustomTaskJsonResult(Map<String, Class<? extends TaskJsonResult>> customTaskJsonResult) {
         customJsonResultMap.putAll(customTaskJsonResult);
+    }
+
+    public static void addCustomTaskXmlyResuly(Map<String, Class<? extends TaskXmlyResult>> customTaskXmlyResult) {
+        customXmlyResultMap.putAll(customTaskXmlyResult);
     }
 
     public static boolean isJsonResult(String resultType) {
@@ -126,10 +148,17 @@ public final class TaskResultFactory {
     public static boolean isHtmlResult(String resultType) {
         if (resultType.equals(TASK_RESULT_TYPE_HTML)) {
             return true;
-        } else if (customHtmlResultMap.containsKey(resultType)) {
-            return true;
+        } else {
+            return customHtmlResultMap.containsKey(resultType);
         }
-        return false;
+    }
+
+    public static boolean isXmlyResult(String resultType) {
+        if (resultType.equals(TASK_RESULT_TYPE_XMLY)) {
+            return true;
+        } else {
+            return customXmlyResultMap.containsKey(resultType);
+        }
     }
 
 

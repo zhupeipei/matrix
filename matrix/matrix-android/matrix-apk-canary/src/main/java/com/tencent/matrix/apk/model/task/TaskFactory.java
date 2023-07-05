@@ -48,6 +48,16 @@ public final class TaskFactory {
     public static final int TASK_TYPE_UNUSED_ASSETS = 13;
     public static final int TASK_TYPE_UNSTRIPPED_SO = 14;
     public static final int TASK_TYPE_COUNT_CLASS = 15;
+    public static final int TASK_TYPE_XMAPK = 16;
+    public static final int TASK_TYPE_XMFILE = 17;
+    public static final int TASK_TYPE_XMMANIFEST = 18;
+    public static final int TASK_TYPE_XMASSETCHECK = 19;
+    public static final int TASK_TYPE_XMIMAGECHECK = 20;
+    public static final int TASK_TYPE_XMRESOURCE = 21;
+    public static final int TASK_TYPE_XMRFILECOUNT = 22;
+    public static final int TASK_TYPE_XMCLASS = 23;
+    public static final int TASK_TYPE_XMMETHOD = 24;
+    public static final int TASK_TYPE_XMLIBCHECK = 25;
 
     public static final List<String> TaskDescription = Collections.unmodifiableList(Arrays.asList(
             "Useless Task for default task type.",
@@ -66,7 +76,6 @@ public final class TaskFactory {
             "Find out the unused assets.",
             "Find out the unstripped shared library files.",
             "Count classes in dex file, output results group by package name."));
-
 
 
     public static final List<String> TaskOptionName = Collections.unmodifiableList(Arrays.asList(
@@ -136,10 +145,37 @@ public final class TaskFactory {
             case TASK_TYPE_COUNT_CLASS:
                 task = new CountClassTask(config, params);
                 break;
-            default:
+            case 16:
+                task = new XmApkTask(config, params);
                 break;
+            case 17:
+                task = new XmDuplicateFileTask(config, params);
+                break;
+            case TASK_TYPE_XMMANIFEST:
+                task = new XmManifestAnalyzeTask(config, params);
+                break;
+            case 19:
+                task = new XmUnusedAssetsTask(config, params);
+                break;
+            case 20:
+                task = new XmFindNonAlphaPngTask(config, params);
+                break;
+            case 21:
+                task = new XmUnusedResourcesTask(config, params);
+                break;
+            case 22:
+                task = new XmCountRTask(config, params);
+                break;
+            case 23:
+                task = new XmClassCountTask(config, params);
+                break;
+            case 24:
+                task = new XmMethodCountTask(config, params);
+                break;
+            case 25:
+                task = new XmMultiLibCheckTask(config, params);
         }
-        return task;
-    }
 
+        return (ApkTask) task;
+    }
 }
